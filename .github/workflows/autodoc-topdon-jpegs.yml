@@ -1,0 +1,25 @@
+name: AUTODOC TOPDON JPEG media
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/autodoc-topdon-jpegs.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet pillow
+      - run: python3 tools/autodoc_convert_images.py
+      - name: Publish product-owned JPEGs under public assets
+        run: |
+          git config user.name "cartline-audit-bot"
+          git config user.email "cartline-audit-bot@users.noreply.github.com"
+          git add public-assets/autodoc/topdon/*.jpg
+          if ! git diff --cached --quiet; then
+            git commit -m "Add 8 optimized TOPDON JPEG catalog media assets"
+            git push origin HEAD:main
+          fi
